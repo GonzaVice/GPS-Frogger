@@ -38,5 +38,5 @@ pip install -r requirements.txt
 #### 5. Ejecutar juego:
 
 ```
-python3 main.py
+python main.py
 ```
