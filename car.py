@@ -1,9 +1,12 @@
 import pygame
+import random
 from settings import TILE_SIZE
 
 class Car:
     def __init__(self, x, y, speed, direction):
-        self.image = pygame.image.load('assets/images/car/car_test.png')
+        car_color_index=random.randint(0,2)
+        car_colors=["red","yellow","blue"]
+        self.image = pygame.image.load('assets/images/car/'+ car_colors[car_color_index]+' car.png')
         self.rect = self.image.get_rect(topleft=(x, y))
         self.x_float = float(x)  # Mantiene la posición en decimal
         self.speed = float(speed)
