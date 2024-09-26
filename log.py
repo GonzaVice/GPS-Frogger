@@ -3,7 +3,7 @@ from settings import TILE_SIZE
 
 class Log:
     def __init__(self, x, y, speed, direction):
-        self.image = pygame.image.load('assets/images/log/log_test.png')
+        self.image = pygame.image.load('assets/images/log/log.png')
         self.rect = self.image.get_rect(topleft=(x, y))
         self.x_float = float(x)  # Mantiene la posición en decimal
         self.speed = float(speed)

@@ -2,7 +2,7 @@ import pygame
 
 class Frog:
     def __init__(self, x, y):
-        self.image = pygame.image.load('assets/images/frog/frog_test.png')
+        self.image = pygame.image.load('assets/images/frog/frog.png')
         self.rect = self.image.get_rect(topleft=(x, y))
         self.direction = 0 # 0 = up, 1 = down, 2 = left, 3 = right
         self.is_ground = True
