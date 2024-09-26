@@ -14,6 +14,7 @@ class Game:
         self.logs = []
         self.logs.append(Log(8 * TILE_SIZE, 6 * TILE_SIZE, 0.5, 1))
         self.logs.append(Log(1 * TILE_SIZE, 3 * TILE_SIZE, 1.5, 0))
+        self.background = pygame.image.load('assets/images/background/background.png')
 
 
     def update(self):
@@ -25,6 +26,7 @@ class Game:
 
     def draw(self):
         self.screen.fill((0, 0, 0))
+        self.screen.blit(self.background, (0, 0))
         for log in self.logs:
             log.draw(self.screen)
         self.frog.draw(self.screen)
