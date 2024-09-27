@@ -2,8 +2,8 @@ import pygame
 from settings import TILE_SIZE
 
 class Log:
-    def __init__(self, x, y, speed, direction):
-        self.image = pygame.image.load('assets/images/log/log.png')
+    def __init__(self, x, y, speed, direction, sprite):
+        self.image = pygame.image.load('assets/images/log/' + sprite)
         self.rect = self.image.get_rect(topleft=(x, y))
         self.x_float = float(x)  # Mantiene la posición en decimal
         self.speed = float(speed)

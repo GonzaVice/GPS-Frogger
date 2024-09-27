@@ -16,9 +16,21 @@ class Game:
         self.cars.append(Car(9 * TILE_SIZE, 11 * TILE_SIZE, 1.5, 0, 'car3.png'))
         self.cars.append(Car(11 * TILE_SIZE, 10 * TILE_SIZE, 2, 1, 'car4.png'))
         self.cars.append(Car(11 * TILE_SIZE, 9 * TILE_SIZE, 0.75, 0, 'truck.png'))
+
         self.logs = []
-        self.logs.append(Log(8 * TILE_SIZE, 6 * TILE_SIZE, 0.5, 1))
-        self.logs.append(Log(1 * TILE_SIZE, 3 * TILE_SIZE, 1.5, 0))
+        self.logs.append(Log(4 * TILE_SIZE, 6 * TILE_SIZE, 0.5, 1, 'log1.png'))
+        self.logs.append(Log(5 * TILE_SIZE, 6 * TILE_SIZE, 0.5, 1, 'log2.png'))
+        self.logs.append(Log(6 * TILE_SIZE, 6 * TILE_SIZE, 0.5, 1, 'log3.png'))
+        self.logs.append(Log(9 * TILE_SIZE, 6 * TILE_SIZE, 0.5, 1, 'log1.png'))
+        self.logs.append(Log(10 * TILE_SIZE, 6 * TILE_SIZE, 0.5, 1, 'log2.png'))
+        self.logs.append(Log(11 * TILE_SIZE, 6 * TILE_SIZE, 0.5, 1, 'log3.png'))
+        
+        self.logs.append(Log(1 * TILE_SIZE, 5 * TILE_SIZE, 1, 1, 'log1.png'))
+        self.logs.append(Log(2 * TILE_SIZE, 5 * TILE_SIZE, 1, 1, 'log2.png'))
+        self.logs.append(Log(3 * TILE_SIZE, 5 * TILE_SIZE, 1, 1, 'log2.png'))
+        self.logs.append(Log(4 * TILE_SIZE, 5 * TILE_SIZE, 1, 1, 'log2.png'))
+        self.logs.append(Log(5 * TILE_SIZE, 5 * TILE_SIZE, 1, 1, 'log3.png'))
+
         self.turtles = []
         self.turtles.append(Turtle(6 * TILE_SIZE, 7 * TILE_SIZE, 1, 0))
         self.turtles.append(Turtle(7 * TILE_SIZE, 7 * TILE_SIZE, 1, 0))
