@@ -1,13 +1,9 @@
 import pygame
-import random
 from settings import TILE_SIZE
 
-class Car:
-    def __init__(self, x, y, speed, direction, sprite):
-        # car_color_index=random.randint(0,2)
-        # car_colors=["red","yellow","blue"]
-        # self.image = pygame.image.load('assets/images/car/'+ car_colors[car_color_index]+' car.png')
-        self.image = pygame.image.load('assets/images/car/'+ sprite)
+class Turtle:
+    def __init__(self, x, y, speed, direction):
+        self.image = pygame.image.load('assets/images/turtle/turtle1.png')
         self.rect = self.image.get_rect(topleft=(x, y))
         self.x_float = float(x)  # Mantiene la posición en decimal
         self.speed = float(speed)
@@ -32,5 +28,5 @@ class Car:
         self.rect.x = int(self.x_float)
 
     def draw(self, surface):
-        # Dibuja el vehiculo en la superficie proporcionada.
+        # Dibuja el tronco en la superficie proporcionada.
         surface.blit(self.image, self.rect)

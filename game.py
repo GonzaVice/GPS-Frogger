@@ -2,6 +2,7 @@ import pygame
 from frog import Frog
 from car import Car
 from log import Log
+from turtl import Turtle
 from settings import TILE_SIZE
 import os
 
@@ -10,11 +11,18 @@ class Game:
         self.screen = screen
         self.frog = Frog(7 * TILE_SIZE, 14 * TILE_SIZE)
         self.cars = []
-        self.cars.append(Car(5 * TILE_SIZE, 12 * TILE_SIZE, 1, 1))
-        self.cars.append(Car(7 * TILE_SIZE, 9 * TILE_SIZE, 2, 0))
+        self.cars.append(Car(5 * TILE_SIZE, 13 * TILE_SIZE, 1, 0, 'car1.png'))
+        self.cars.append(Car(7 * TILE_SIZE, 12 * TILE_SIZE, 0.25, 1, 'car2.png'))
+        self.cars.append(Car(9 * TILE_SIZE, 11 * TILE_SIZE, 1.5, 0, 'car3.png'))
+        self.cars.append(Car(11 * TILE_SIZE, 10 * TILE_SIZE, 2, 1, 'car4.png'))
+        self.cars.append(Car(11 * TILE_SIZE, 9 * TILE_SIZE, 0.75, 0, 'truck.png'))
         self.logs = []
         self.logs.append(Log(8 * TILE_SIZE, 6 * TILE_SIZE, 0.5, 1))
         self.logs.append(Log(1 * TILE_SIZE, 3 * TILE_SIZE, 1.5, 0))
+        self.turtles = []
+        self.turtles.append(Turtle(6 * TILE_SIZE, 7 * TILE_SIZE, 1, 0))
+        self.turtles.append(Turtle(7 * TILE_SIZE, 7 * TILE_SIZE, 1, 0))
+        self.turtles.append(Turtle(8 * TILE_SIZE, 7 * TILE_SIZE, 1, 0))
         self.background = pygame.image.load('assets/images/background/background.png')
 
         # Puntuaciones
@@ -55,6 +63,8 @@ class Game:
             car.update()
         for log in self.logs:
             log.update()
+        for turtle in self.turtles:
+            turtle.update()
 
     def draw(self):
         self.screen.fill((0, 0, 0))
@@ -63,6 +73,8 @@ class Game:
         # Dibujar troncos y autos
         for log in self.logs:
             log.draw(self.screen)
+        for turtle in self.turtles:
+            turtle.draw(self.screen)
         self.frog.draw(self.screen)
         for car in self.cars:
             car.draw(self.screen)
