@@ -3,6 +3,7 @@ from frog import Frog
 from car import Car
 from log import Log
 from settings import TILE_SIZE
+import os
 
 class Game:
     def __init__(self, screen):
@@ -16,6 +17,37 @@ class Game:
         self.logs.append(Log(1 * TILE_SIZE, 3 * TILE_SIZE, 1.5, 0))
         self.background = pygame.image.load('assets/images/background/background.png')
 
+        # Puntuaciones
+        self.score = 0
+        self.high_score = 1000
+        self.lives = 3
+
+        # Cargar imágenes de letras y números
+        self.font_images = self.load_font_images()
+
+    def load_font_images(self):
+        """ Carga las imágenes de las letras y números desde la carpeta de assets. """
+        font_images = {}
+        font_path = 'assets/font/'
+        for char in '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ':
+            image_path = os.path.join(font_path, f'{char}.png')
+            font_images[char] = pygame.image.load(image_path)
+        return font_images
+    
+    def tint_image(self, image, color):
+        """ Aplica un color de tinte a la imagen. """
+        tinted_image = image.copy()
+        tinted_image.fill(color, special_flags=pygame.BLEND_RGBA_MULT)
+        return tinted_image
+
+    def render_text(self, text, x, y, color=(255, 255, 255)):
+        """ Renderiza el texto usando las imágenes de las letras y números, aplicando un tinte de color. """
+        for index, char in enumerate(text):
+            if char in self.font_images:
+                char_image = self.font_images[char]
+                # Aplica el color al carácter
+                colored_image = self.tint_image(char_image, color)
+                self.screen.blit(colored_image, (x + index * colored_image.get_width(), y))
 
     def update(self):
         self.frog.update()
@@ -27,8 +59,18 @@ class Game:
     def draw(self):
         self.screen.fill((0, 0, 0))
         self.screen.blit(self.background, (0, 0))
+
+        # Dibujar troncos y autos
         for log in self.logs:
             log.draw(self.screen)
         self.frog.draw(self.screen)
         for car in self.cars:
             car.draw(self.screen)
+
+        # Dibujar puntaje, hi-score y vidas
+        self.render_text(f'1-UP', 4*(int(TILE_SIZE/2)), 0*(int(TILE_SIZE/2)), (242, 242, 240))
+        self.render_text(f'{self.score}', 4*(int(TILE_SIZE/2)), 1*(int(TILE_SIZE/2)), (189, 81, 90))
+        self.render_text(f'HI-SCORE', 10*(int(TILE_SIZE/2)), 0*(int(TILE_SIZE/2)), (242, 242, 240))
+        self.render_text(f'{self.high_score}', 10*(int(TILE_SIZE/2)), 1*(int(TILE_SIZE/2)), (189, 81, 90))
+        self.render_text(f'TIME', 24*(int(TILE_SIZE/2)), 31*(int(TILE_SIZE/2)), (243, 208, 64))
+
