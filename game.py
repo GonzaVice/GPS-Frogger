@@ -8,8 +8,10 @@ import os
 
 class Game:
     def __init__(self, screen):
+        x_inicial = 7 * TILE_SIZE
+        y_inicial = 14 * TILE_SIZE
         self.screen = screen
-        self.frog = Frog(7 * TILE_SIZE, 14 * TILE_SIZE)
+        self.frog = Frog(x_inicial, y_inicial) # 16x16 pixeles
         self.cars = []
         self.cars.append(Car(5 * TILE_SIZE, 13 * TILE_SIZE, 1, 0, 'car1.png'))
         self.cars.append(Car(7 * TILE_SIZE, 12 * TILE_SIZE, 0.25, 1, 'car2.png'))
@@ -18,23 +20,42 @@ class Game:
         self.cars.append(Car(11 * TILE_SIZE, 9 * TILE_SIZE, 0.75, 0, 'truck.png'))
 
         self.logs = []
-        self.logs.append(Log(4 * TILE_SIZE, 6 * TILE_SIZE, 0.5, 1, 'log1.png'))
-        self.logs.append(Log(5 * TILE_SIZE, 6 * TILE_SIZE, 0.5, 1, 'log2.png'))
-        self.logs.append(Log(6 * TILE_SIZE, 6 * TILE_SIZE, 0.5, 1, 'log3.png'))
-        self.logs.append(Log(9 * TILE_SIZE, 6 * TILE_SIZE, 0.5, 1, 'log1.png'))
-        self.logs.append(Log(10 * TILE_SIZE, 6 * TILE_SIZE, 0.5, 1, 'log2.png'))
-        self.logs.append(Log(11 * TILE_SIZE, 6 * TILE_SIZE, 0.5, 1, 'log3.png'))
+        self.logs.append(Log(4 * TILE_SIZE, 6 * TILE_SIZE, 1, 1, 'log1.png'))
+        self.logs.append(Log(5 * TILE_SIZE, 6 * TILE_SIZE, 1, 1, 'log2.png'))
+        self.logs.append(Log(6 * TILE_SIZE, 6 * TILE_SIZE, 1, 1, 'log3.png'))
+        self.logs.append(Log(9 * TILE_SIZE, 6 * TILE_SIZE, 1, 1, 'log1.png'))
+        self.logs.append(Log(10 * TILE_SIZE, 6 * TILE_SIZE, 1, 1, 'log2.png'))
+        self.logs.append(Log(11 * TILE_SIZE, 6 * TILE_SIZE, 1, 1, 'log3.png'))
         
-        self.logs.append(Log(1 * TILE_SIZE, 5 * TILE_SIZE, 1, 1, 'log1.png'))
-        self.logs.append(Log(2 * TILE_SIZE, 5 * TILE_SIZE, 1, 1, 'log2.png'))
-        self.logs.append(Log(3 * TILE_SIZE, 5 * TILE_SIZE, 1, 1, 'log2.png'))
-        self.logs.append(Log(4 * TILE_SIZE, 5 * TILE_SIZE, 1, 1, 'log2.png'))
-        self.logs.append(Log(5 * TILE_SIZE, 5 * TILE_SIZE, 1, 1, 'log3.png'))
+        self.logs.append(Log(1 * TILE_SIZE, 5 * TILE_SIZE, 2, 1, 'log1.png'))
+        self.logs.append(Log(2 * TILE_SIZE, 5 * TILE_SIZE, 2, 1, 'log2.png'))
+        self.logs.append(Log(3 * TILE_SIZE, 5 * TILE_SIZE, 2, 1, 'log2.png'))
+        self.logs.append(Log(4 * TILE_SIZE, 5 * TILE_SIZE, 2, 1, 'log2.png'))
+        self.logs.append(Log(5 * TILE_SIZE, 5 * TILE_SIZE, 2, 1, 'log3.png'))
+
+        self.logs.append(Log(1 * TILE_SIZE, 3 * TILE_SIZE, 1, 1, 'log1.png'))
+        self.logs.append(Log(2 * TILE_SIZE, 3 * TILE_SIZE, 1, 1, 'log2.png'))
+        self.logs.append(Log(3 * TILE_SIZE, 3 * TILE_SIZE, 1, 1, 'log2.png'))
+        self.logs.append(Log(4 * TILE_SIZE, 3 * TILE_SIZE, 1, 1, 'log3.png'))
+        self.logs.append(Log(7 * TILE_SIZE, 3 * TILE_SIZE, 1, 1, 'log1.png'))
+        self.logs.append(Log(8 * TILE_SIZE, 3 * TILE_SIZE, 1, 1, 'log2.png'))
+        self.logs.append(Log(9 * TILE_SIZE, 3 * TILE_SIZE, 1, 1, 'log2.png'))
+        self.logs.append(Log(10 * TILE_SIZE, 3 * TILE_SIZE, 1, 1, 'log3.png'))
 
         self.turtles = []
         self.turtles.append(Turtle(6 * TILE_SIZE, 7 * TILE_SIZE, 1, 0))
         self.turtles.append(Turtle(7 * TILE_SIZE, 7 * TILE_SIZE, 1, 0))
         self.turtles.append(Turtle(8 * TILE_SIZE, 7 * TILE_SIZE, 1, 0))
+        self.turtles.append(Turtle(11 * TILE_SIZE, 7 * TILE_SIZE, 1, 0))
+        self.turtles.append(Turtle(12 * TILE_SIZE, 7 * TILE_SIZE, 1, 0))
+        self.turtles.append(Turtle(13 * TILE_SIZE, 7 * TILE_SIZE, 1, 0))
+        
+        self.turtles.append(Turtle(1 * TILE_SIZE, 4 * TILE_SIZE, 1, 0))
+        self.turtles.append(Turtle(2 * TILE_SIZE, 4 * TILE_SIZE, 1, 0))
+        self.turtles.append(Turtle(5 * TILE_SIZE, 4 * TILE_SIZE, 1, 0))
+        self.turtles.append(Turtle(6 * TILE_SIZE, 4 * TILE_SIZE, 1, 0))
+        self.turtles.append(Turtle(9 * TILE_SIZE, 4 * TILE_SIZE, 1, 0))
+        self.turtles.append(Turtle(10 * TILE_SIZE, 4 * TILE_SIZE, 1, 0))
         self.background = pygame.image.load('assets/images/background/background.png')
 
         # Puntuaciones
@@ -69,7 +90,29 @@ class Game:
                 colored_image = self.tint_image(char_image, color)
                 self.screen.blit(colored_image, (x + index * colored_image.get_width(), y))
 
+    def check_collision(self, frog, cars, logs, turtles):
+        for car in cars:
+            if frog.rect.colliderect(car.rect):
+                # Lógica cuando la rana es golpeada por un coche
+                frog.is_ground = True
+                frog.rect.topleft = (7 * TILE_SIZE, 14 * TILE_SIZE)  # Posición inicial de la rana
+                return  # Termina la función si la rana colisiona con un coche
+
+        for log in logs:
+            if frog.rect.colliderect(log.rect):
+                frog.rect.x += log.speed  # Actualiza la posición de la rana basada en la velocidad del tronco
+                break  # Sal del bucle si la rana colisiona con un tronco
+
+        for turtle in turtles:
+            if frog.rect.colliderect(turtle.rect):
+                frog.rect.x -= turtle.speed  # Actualiza la posición de la rana basada en la velocidad de la tortuga
+                break  # Sal del bucle si la rana colisiona con una tortuga
+
+
     def update(self):
+
+        self.check_collision(self.frog, self.cars, self.logs, self.turtles)
+
         self.frog.update()
         for car in self.cars:
             car.update()
