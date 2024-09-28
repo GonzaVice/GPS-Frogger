@@ -76,6 +76,7 @@ class Game:
         # Cargar efectos de sonidos
         self.car_hit = pygame.mixer.Sound('assets/sounds/car_hit.mp3')
         self.log_sound = pygame.mixer.Sound('assets/sounds/log_landing.mp3')
+        self.turtle_sound = pygame.mixer.Sound('assets/sounds/turtle_landing.mp3')
 
         # Variable para verificar si la rana ya está sobre un tronco
         self.on_log = False
@@ -133,10 +134,22 @@ class Game:
         # Actualizar la variable de estado para saber en qué tronco está la rana
         self.on_log = new_log if is_on_log else None
 
+        # Verificar si la rana está sobre una tortuga
+        is_on_turtle = False  # Para verificar si la rana está en una tortuga en este cuadro
         for turtle in turtles:
             if frog.rect.colliderect(turtle.rect):
-                frog.rect.x -= turtle.speed  # Actualiza la posición de la rana basada en la velocidad de la tortuga
+                is_on_turtle = True  # La rana está en una tortuga
+
+                # Si no estaba en una tortuga antes, pero ahora sí, reproducir el sonido
+                if not self.on_turtle:
+                    self.turtle_sound.play()
+
+                # Actualizar la posición de la rana basada en la velocidad de la tortuga
+                frog.rect.x -= turtle.speed
                 break  # Sal del bucle si la rana colisiona con una tortuga
+
+        # Actualizar la variable de estado de las tortugas
+        self.on_turtle = is_on_turtle
 
 
     def update(self):
