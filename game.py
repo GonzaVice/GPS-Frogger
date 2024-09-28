@@ -73,6 +73,9 @@ class Game:
         # Cargar imágenes de letras y números
         self.font_images = self.load_font_images()
 
+        # Cargar efectos de sonidos
+        self.car_hit = pygame.mixer.Sound('assets/sounds/car_hit.mp3')
+
     def load_font_images(self):
         """ Carga las imágenes de las letras y números desde la carpeta de assets. """
         font_images = {}
@@ -101,6 +104,7 @@ class Game:
         for car in cars:
             if frog.rect.colliderect(car.rect):
                 # Lógica cuando la rana es golpeada por un coche
+                self.car_hit.play()
                 frog.is_ground = True
                 frog.rect.topleft = (7 * TILE_SIZE, 14 * TILE_SIZE)  # Posición inicial de la rana
                 return  # Termina la función si la rana colisiona con un coche
