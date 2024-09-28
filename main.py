@@ -17,6 +17,11 @@ def main():
     game_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
     game = Game(game_surface)
 
+    # Configurar la música de fondo
+    pygame.mixer.music.load('assets/music/background_music.mp3')
+    pygame.mixer.music.play(-1)
+
+
     running = True
     while running:
         for event in pygame.event.get():
