@@ -152,6 +152,12 @@ class Game:
         # Actualizar la variable de estado de las tortugas
         self.on_turtle = is_on_turtle
 
+        # Verificar si la rana cae al agua
+        if frog.rect.y < 8 * TILE_SIZE and self.frog.is_ground and not (is_on_log or is_on_turtle):
+            # La rana está en la zona del río y no está sobre un tronco ni una tortuga
+            self.game_state = 3  # Muerte por ahogamiento
+            self.timer = 0  # Reiniciar el temporizador para la animación de muerte
+
     def reset_frog(self):
         self.frog.rect.topleft = (7 * TILE_SIZE, 14 * TILE_SIZE)
         self.game_state = 1
