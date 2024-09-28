@@ -12,9 +12,12 @@ class Game:
         self.timer = 0
         self.screen = screen
         self.frog = Frog(7 * TILE_SIZE, 14 * TILE_SIZE)
+        self.selected_option = 0 # 0: Game Start, 1: Leaderboard, 2: Credits
+        self.key_pressed = False  # Bandera para rastrear si una tecla ya está presionada
 
         # Configuración de autos
         car_configs = [
+            # Format: (x, y, speed, direction)
             (5, 13, 1, 0, 'car1.png'),
             (7, 12, 0.25, 1, 'car2.png'),
             (9, 11, 1.5, 0, 'car3.png'),
@@ -27,7 +30,7 @@ class Game:
         self.logs = []
 
         log_positions = [
-            # Format: (start_x, y, length, type)
+            # Format: (x, y, length, speed)
             (4, 6, 3, 1),   # Logs at row 6
             (9, 6, 3, 1),   # Logs at row 6
             (1, 5, 5, 2),   # Logs at row 5
@@ -35,7 +38,7 @@ class Game:
             (7, 3, 4, 1),   # Logs at row 3
         ]
 
-        for start_x, y, length, log_type in log_positions:
+        for start_x, y, length, speed in log_positions:
             for i in range(length):
                 if i == 0:
                     image = 'log_left.png'
@@ -44,7 +47,7 @@ class Game:
                 else:
                     image = 'log_middle.png'
                 
-                self.logs.append(Log((start_x + i) * TILE_SIZE, y * TILE_SIZE, log_type, 1, image))
+                self.logs.append(Log((start_x + i) * TILE_SIZE, y * TILE_SIZE, speed, 1, image))
 
 
         # Configuración de tortugas
@@ -65,6 +68,8 @@ class Game:
         self.score = 0
         self.high_score = 1000
         self.lives = 3
+        self.leaderboard_scores = [1500, 1200, 1000, 800, 500]  # Cinco puntajes máximos
+
 
         # Cargar imágenes de letras y números
         self.font_images = self.load_font_images()
@@ -102,10 +107,12 @@ class Game:
 
     def check_collision(self, frog):
         if self.game_state == 1:
+            # Verificar colisión con los coches
             for car in self.cars:
                 if frog.rect.colliderect(car.rect):
                     self.car_hit.play()
                     self.game_state = 2  # Muerte por golpe con coche
+                    self.timer = 0  # Reiniciar el temporizador para la animación de muerte
                     return
 
         # Verificar si la rana está sobre un tronco
@@ -145,14 +152,76 @@ class Game:
         # Actualizar la variable de estado de las tortugas
         self.on_turtle = is_on_turtle
 
+    def reset_frog(self):
+        self.frog.rect.topleft = (7 * TILE_SIZE, 14 * TILE_SIZE)
+        self.game_state = 1
+        self.timer = 0
+        self.frog.is_ground = True
+        self.frog.image = self.frog.images['ground_up']
+
+    def handle_menu_input(self):
+        """Maneja la entrada del usuario para el menú."""
+        keys = pygame.key.get_pressed()
+        
+        if not self.key_pressed:
+            if keys[pygame.K_DOWN]:
+                self.selected_option = (self.selected_option + 1) % 3
+                self.key_pressed = True
+            elif keys[pygame.K_UP]:
+                self.selected_option = (self.selected_option - 1) % 3
+                self.key_pressed = True
+            elif keys[pygame.K_s] or keys[pygame.K_RETURN]:
+                if self.selected_option == 0:
+                    self.game_state = 1  # Start Game
+                elif self.selected_option == 1:
+                    self.game_state = 5  # Leaderboard
+                elif self.selected_option == 2:
+                    self.game_state = 6  # Credits
+                self.key_pressed = True
+
+        # Si ninguna de las teclas está presionada, restablecemos la bandera
+        if not keys[pygame.K_DOWN] and not keys[pygame.K_UP] and not keys[pygame.K_s] and not keys[pygame.K_RETURN]:
+            self.key_pressed = False
+
+    def handle_leaderboard_input(self):
+        """Maneja la entrada del usuario para el leaderboard."""
+        keys = pygame.key.get_pressed()
+        
+        if not self.key_pressed:
+            if keys[pygame.K_s] or keys[pygame.K_RETURN]:
+                self.game_state = 0  # Regresar al menú principal
+                self.key_pressed = True
+
+        if not keys[pygame.K_s] and not keys[pygame.K_RETURN]:
+            self.key_pressed = False
+
+    def handle_credits_input(self):
+        """Maneja la entrada del usuario para los créditos."""
+        keys = pygame.key.get_pressed()
+        
+        if not self.key_pressed:
+            if keys[pygame.K_s] or keys[pygame.K_RETURN]:
+                self.game_state = 0  # Regresar al menú principal
+                self.key_pressed = True
+
+        if not keys[pygame.K_s] and not keys[pygame.K_RETURN]:
+            self.key_pressed = False
 
     def update(self):
-        keys = pygame.key.get_pressed()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
 
-        if self.game_state == 0 and keys[pygame.K_s]:
-            self.game_state = 1
+        if self.game_state == 0:
+            self.handle_menu_input()
+        elif self.game_state == 5:
+            self.handle_leaderboard_input()
+        elif self.game_state == 6:
+            self.handle_credits_input()
 
-        elif self.game_state in [1, 2, 3, 4]:
+        if self.game_state == 1:
+            # Juego normal, actualizar colisiones y objetos en movimiento
             self.check_collision(self.frog)
             for car in self.cars:
                 car.update()
@@ -161,35 +230,49 @@ class Game:
             for turtle in self.turtles:
                 turtle.update()
 
-            if self.game_state == 1:
-                self.frog.update()
-            elif self.game_state in [2, 3, 4]:
-                if self.timer >= 30:
-                    if self.game_state in [2, 3]:
-                        self.timer = 0
-                        self.game_state = 4
-                    elif self.game_state == 4:
-                        self.reset_frog()
-                else:
-                    self.timer += 1
-                    if self.game_state == 2:
-                        self.frog.image = self.frog.images['slam']
-                    elif self.game_state == 3:
-                        self.frog.image = self.frog.images['drown']
-                    elif self.game_state == 4:
-                        self.frog.image = self.frog.images['death']
+            self.frog.update()
 
-    def reset_frog(self):
-        self.frog.rect.topleft = (7 * TILE_SIZE, 14 * TILE_SIZE)
-        self.game_state = 1
-        self.timer = 0
-        self.frog.is_ground = True
-        self.frog.image = self.frog.images['ground_up']
+        elif self.game_state in [2, 3, 4]:
+            # Manejar la animación de la muerte y la transición a la pantalla de reaparición
+            if self.timer < 30:
+                self.timer += 1
+                if self.game_state == 2:
+                    self.frog.image = self.frog.images['slam']  # Imagen de golpe por coche
+                elif self.game_state == 3:
+                    self.frog.image = self.frog.images['drown']  # Imagen de ahogamiento
+                elif self.game_state == 4:
+                    self.frog.image = self.frog.images['death']  # Imagen de muerte final
+            else:
+                # Después de 30 cuadros, resetear la rana y reanudar el juego
+                if self.game_state in [2, 3]:
+                    self.timer = 0
+                    self.game_state = 4
+                elif self.game_state == 4:
+                    self.reset_frog()
 
     def draw(self):
         if self.game_state == 0:
             self.screen.blit(self.menu, (0, 0))
-            self.render_text('PRESIONA S PARA COMENZAR', 2 * (TILE_SIZE // 2), 18 * (TILE_SIZE // 2), (243, 208, 64))
+            options = ['GAME START', 'LEADERBOARD', 'CREDITS']
+            for i, option in enumerate(options):
+                color = (243, 208, 64) if i == self.selected_option else (255, 255, 255)
+                self.render_text(option, 2 * (TILE_SIZE // 2), (18 + i) * (TILE_SIZE // 2) + (4 * i), color)
+
+        elif self.game_state == 5:
+            self.screen.blit(self.leaderboard, (0, 0))
+            self.render_text('HI-SCORES:', 2 * (TILE_SIZE // 2), 2 * TILE_SIZE, (243, 208, 64))
+            for i in range(5):
+                self.render_text(f'{i + 1}. SCORE: {self.high_score - (i * 100)}', 2 * (TILE_SIZE // 2), (4 + i) * TILE_SIZE, (242, 242, 240))
+            self.render_text('PRESIONA S PARA VOLVER', 2 * (TILE_SIZE // 2), 18 * (TILE_SIZE // 2), (243, 208, 64))
+
+        elif self.game_state == 6:
+            self.screen.blit(self.leaderboard, (0, 0))
+            credits = ['GONZALO VICENTE', 'JOSE MORALES', 'MATIAS MUNOZ', 'JOSE QUEIROLO']
+            self.render_text('CREDITS:', 2 * (TILE_SIZE // 2), 2 * TILE_SIZE, (243, 208, 64))
+            for i, name in enumerate(credits):
+                self.render_text(name, 2 * (TILE_SIZE // 2), (4 + i) * TILE_SIZE, (242, 242, 240))
+            self.render_text('PRESIONA S PARA VOLVER', 2 * (TILE_SIZE // 2), 18 * (TILE_SIZE // 2), (243, 208, 64))
+
         elif self.game_state in [1, 2, 3, 4]:
             self.screen.blit(self.background, (0, 0))
             for log in self.logs:
@@ -206,3 +289,5 @@ class Game:
             self.render_text('HI-SCORE', 10 * (TILE_SIZE // 2), 0, (242, 242, 240))
             self.render_text(str(self.high_score), 10 * (TILE_SIZE // 2), TILE_SIZE // 2, (189, 81, 90))
             self.render_text('TIME', 24 * (TILE_SIZE // 2), 31 * (TILE_SIZE // 2), (243, 208, 64))
+
+
