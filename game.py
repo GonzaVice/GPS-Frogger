@@ -66,6 +66,17 @@ class Game:
         self.high_score = 1000
         self.lives = 3
 
+        # Cargar imágenes de letras y números
+        self.font_images = self.load_font_images()
+
+        # Cargar efectos de sonidos
+        self.car_hit = pygame.mixer.Sound('assets/sounds/car_hit.mp3')
+        self.log_sound = pygame.mixer.Sound('assets/sounds/log_landing.mp3')
+        self.turtle_sound = pygame.mixer.Sound('assets/sounds/turtle_landing.mp3')
+
+        # Variable para verificar si la rana ya está sobre un tronco
+        self.on_log = False
+
     def load_font_images(self):
         """ Carga las imágenes de las letras y números desde la carpeta de assets. """
         font_images = {}
@@ -93,18 +104,47 @@ class Game:
         if self.game_state == 1:
             for car in self.cars:
                 if frog.rect.colliderect(car.rect):
+                    self.car_hit.play()
                     self.game_state = 2  # Muerte por golpe con coche
                     return
 
-            for log in self.logs:
-                if frog.rect.colliderect(log.rect):
-                    frog.rect.x += log.speed
-                    return
+        # Verificar si la rana está sobre un tronco
+        is_on_log = False  # Para verificar si la rana está en un tronco en este cuadro
+        new_log = None  # Guardar referencia al nuevo tronco
 
-            for turtle in self.turtles:
-                if frog.rect.colliderect(turtle.rect):
-                    frog.rect.x -= turtle.speed
-                    return
+        for log in self.logs:
+            if frog.rect.colliderect(log.rect):
+                is_on_log = True  # La rana está en un tronco
+                new_log = log  # Guardar el tronco actual
+
+                # Si no estaba en un tronco antes, pero ahora sí, reproducir el sonido
+                if not self.on_log or self.on_log != new_log:
+                    self.log_sound.play()
+
+                # Actualizar la posición de la rana basada en la velocidad del tronco
+                frog.rect.x += log.speed
+                break  # Sal del bucle si la rana colisiona con un tronco
+
+        # Actualizar la variable de estado para saber en qué tronco está la rana
+        self.on_log = new_log if is_on_log else None
+
+        # Verificar si la rana está sobre una tortuga
+        is_on_turtle = False  # Para verificar si la rana está en una tortuga en este cuadro
+        for turtle in self.turtles:
+            if frog.rect.colliderect(turtle.rect):
+                is_on_turtle = True  # La rana está en una tortuga
+
+                # Si no estaba en una tortuga antes, pero ahora sí, reproducir el sonido
+                if not self.on_turtle:
+                    self.turtle_sound.play()
+
+                # Actualizar la posición de la rana basada en la velocidad de la tortuga
+                frog.rect.x -= turtle.speed
+                break  # Sal del bucle si la rana colisiona con una tortuga
+
+        # Actualizar la variable de estado de las tortugas
+        self.on_turtle = is_on_turtle
+
 
     def update(self):
         keys = pygame.key.get_pressed()
@@ -143,7 +183,6 @@ class Game:
         self.frog.rect.topleft = (7 * TILE_SIZE, 14 * TILE_SIZE)
         self.game_state = 1
         self.timer = 0
-        self.car_hit.play()
         self.frog.is_ground = True
         self.frog.image = self.frog.images['ground_up']
 
