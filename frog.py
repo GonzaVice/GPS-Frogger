@@ -14,6 +14,8 @@ class Frog:
             'jump_right': pygame.image.load('assets/images/frog/frogger_jump_right.png'),
         }
 
+        self.jump_sound = pygame.mixer.Sound('assets/sounds/frog_jump.mp3')
+
         # La imagen inicial es cuando está en el suelo mirando hacia arriba
         self.image = self.images['ground_up']
         self.rect = self.image.get_rect(topleft=(x, y))
@@ -26,6 +28,7 @@ class Frog:
         self.direction = direction
         self.is_ground = False
         self.jump_speed_index = 0
+        self.jump_sound.play()
         # Cambiar la imagen según la dirección del salto
         if self.direction == 0:
             self.image = self.images['jump_up']
