@@ -8,10 +8,14 @@ import os
 
 class Game:
     def __init__(self, screen):
-        x_inicial = 7 * TILE_SIZE
-        y_inicial = 14 * TILE_SIZE
+        self.game_state = 0
+        # 0: Menu
+        # 1: Level
+        # 2: Leaderboard
+
         self.screen = screen
-        self.frog = Frog(x_inicial, y_inicial) # 16x16 pixeles
+        self.frog = Frog(7 * TILE_SIZE, 14 * TILE_SIZE) # 16x16 pixeles
+
         self.cars = []
         self.cars.append(Car(5 * TILE_SIZE, 13 * TILE_SIZE, 1, 0, 'car1.png'))
         self.cars.append(Car(7 * TILE_SIZE, 12 * TILE_SIZE, 0.25, 1, 'car2.png'))
@@ -56,7 +60,10 @@ class Game:
         self.turtles.append(Turtle(6 * TILE_SIZE, 4 * TILE_SIZE, 1, 0))
         self.turtles.append(Turtle(9 * TILE_SIZE, 4 * TILE_SIZE, 1, 0))
         self.turtles.append(Turtle(10 * TILE_SIZE, 4 * TILE_SIZE, 1, 0))
+
+        self.menu = pygame.image.load('assets/images/background/menu.png')
         self.background = pygame.image.load('assets/images/background/background.png')
+        self.leaderboard = pygame.image.load('assets/images/background/leaderboard.png')
 
         # Puntuaciones
         self.score = 0
@@ -110,34 +117,44 @@ class Game:
 
 
     def update(self):
+        keys = pygame.key.get_pressed()
 
-        self.check_collision(self.frog, self.cars, self.logs, self.turtles)
+        if self.game_state == 0:
+            if keys[pygame.K_s]:
+                self.game_state = 1
 
-        self.frog.update()
-        for car in self.cars:
-            car.update()
-        for log in self.logs:
-            log.update()
-        for turtle in self.turtles:
-            turtle.update()
+        elif self.game_state == 1:
+            self.check_collision(self.frog, self.cars, self.logs, self.turtles)
+            self.frog.update()
+            for car in self.cars:
+                car.update()
+            for log in self.logs:
+                log.update()
+            for turtle in self.turtles:
+                turtle.update()
 
     def draw(self):
-        self.screen.fill((0, 0, 0))
-        self.screen.blit(self.background, (0, 0))
+        if self.game_state == 0:
+            self.screen.blit(self.menu, (0, 0))
+            self.render_text(f'PRESIONA S PARA COMENZAR', 2*(int(TILE_SIZE/2)), 18*(int(TILE_SIZE/2)), (243, 208, 64))
 
-        # Dibujar troncos y autos
-        for log in self.logs:
-            log.draw(self.screen)
-        for turtle in self.turtles:
-            turtle.draw(self.screen)
-        self.frog.draw(self.screen)
-        for car in self.cars:
-            car.draw(self.screen)
 
-        # Dibujar puntaje, hi-score y vidas
-        self.render_text(f'1-UP', 4*(int(TILE_SIZE/2)), 0*(int(TILE_SIZE/2)), (242, 242, 240))
-        self.render_text(f'{self.score}', 4*(int(TILE_SIZE/2)), 1*(int(TILE_SIZE/2)), (189, 81, 90))
-        self.render_text(f'HI-SCORE', 10*(int(TILE_SIZE/2)), 0*(int(TILE_SIZE/2)), (242, 242, 240))
-        self.render_text(f'{self.high_score}', 10*(int(TILE_SIZE/2)), 1*(int(TILE_SIZE/2)), (189, 81, 90))
-        self.render_text(f'TIME', 24*(int(TILE_SIZE/2)), 31*(int(TILE_SIZE/2)), (243, 208, 64))
+        elif self.game_state == 1:
+            self.screen.blit(self.background, (0, 0))
+
+            # Dibujar troncos y autos
+            for log in self.logs:
+                log.draw(self.screen)
+            for turtle in self.turtles:
+                turtle.draw(self.screen)
+            self.frog.draw(self.screen)
+            for car in self.cars:
+                car.draw(self.screen)
+
+            # Dibujar puntaje, hi-score y vidas
+            self.render_text(f'1-UP', 4*(int(TILE_SIZE/2)), 0*(int(TILE_SIZE/2)), (242, 242, 240))
+            self.render_text(f'{self.score}', 4*(int(TILE_SIZE/2)), 1*(int(TILE_SIZE/2)), (189, 81, 90))
+            self.render_text(f'HI-SCORE', 10*(int(TILE_SIZE/2)), 0*(int(TILE_SIZE/2)), (242, 242, 240))
+            self.render_text(f'{self.high_score}', 10*(int(TILE_SIZE/2)), 1*(int(TILE_SIZE/2)), (189, 81, 90))
+            self.render_text(f'TIME', 24*(int(TILE_SIZE/2)), 31*(int(TILE_SIZE/2)), (243, 208, 64))
 
