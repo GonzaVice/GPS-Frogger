@@ -14,6 +14,9 @@ class Game:
         self.frog = Frog(7 * TILE_SIZE, 14 * TILE_SIZE)
         self.selected_option = 0 # 0: Game Start, 1: Leaderboard, 2: Credits
         self.key_pressed = False  # Bandera para rastrear si una tecla ya está presionada
+        self.game_over = False  # Variable para ver si el juego terminó
+        self.game_over_option = 0  # 0: Try Again, 1: Back to Menu
+        self.paused = False  # Indica si el juego está pausado
 
         # Configuración de autos
         car_configs = [
@@ -63,13 +66,13 @@ class Game:
         self.leaderboard = pygame.image.load('assets/images/background/leaderboard.png')
         self.font_images = self.load_font_images()
         self.car_hit = pygame.mixer.Sound('assets/sounds/car_hit.mp3')
+        self.game_over_sound = pygame.mixer.Sound('assets/sounds/death_sound.mp3')
 
         # Puntuaciones y vidas
         self.score = 0
         self.high_score = 1000
         self.lives = 3
         self.leaderboard_scores = [1500, 1200, 1000, 800, 500]  # Cinco puntajes máximos
-
 
         # Cargar imágenes de letras y números
         self.font_images = self.load_font_images()
@@ -81,6 +84,9 @@ class Game:
 
         # Variable para verificar si la rana ya está sobre un tronco
         self.on_log = False
+
+        if self.game_over:
+            self.paused = True  # Pausa el juego
 
     def load_font_images(self):
         """ Carga las imágenes de las letras y números desde la carpeta de assets. """
@@ -107,14 +113,18 @@ class Game:
 
     def check_collision(self, frog):
         if self.game_state == 1:
-            # Verificar colisión con los coches
+        # Verificar colisión con los coches
             for car in self.cars:
                 if frog.rect.colliderect(car.rect):
                     self.car_hit.play()
-                    self.game_state = 2  # Muerte por golpe con coche
+                    self.lives -= 1  # Resta una vida al chocar con un coche
+                    if self.lives > 0:
+                        self.game_state = 2  # Muerte por golpe con coche
+                    else:
+                        self.game_over = True  # Si las vidas se acaban, se activa el Game Over
                     self.timer = 0  # Reiniciar el temporizador para la animación de muerte
                     return
-
+                
         # Verificar si la rana está sobre un tronco
         is_on_log = False  # Para verificar si la rana está en un tronco en este cuadro
         new_log = None  # Guardar referencia al nuevo tronco
@@ -155,8 +165,13 @@ class Game:
         # Verificar si la rana cae al agua
         if frog.rect.y < 8 * TILE_SIZE and self.frog.is_ground and not (is_on_log or is_on_turtle):
             # La rana está en la zona del río y no está sobre un tronco ni una tortuga
-            self.game_state = 3  # Muerte por ahogamiento
+            self.lives -= 1  # Resta una vida si la rana cae al agua
+            if self.lives > 0:
+                self.game_state = 3  # Muerte por ahogamiento
+            else:
+                self.game_over = True  # Si las vidas se acaban, se activa el Game Over
             self.timer = 0  # Reiniciar el temporizador para la animación de muerte
+
 
     def reset_frog(self):
         self.frog.rect.topleft = (7 * TILE_SIZE, 14 * TILE_SIZE)
@@ -213,11 +228,32 @@ class Game:
         if not keys[pygame.K_s] and not keys[pygame.K_RETURN]:
             self.key_pressed = False
 
+    def handle_game_over_input(self):
+        """Maneja la entrada del usuario en la pantalla de Game Over."""
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_r]:  # Volver a intentar
+            self.reset_game()
+        elif keys[pygame.K_m]:  # Volver al menú
+            self.game_state = 0  # Regresar al menú
+            self.game_over = False  # Restablecer el estado de Game Over
+
+    def reset_game(self):
+        self.lives = 3
+        self.score = 0
+        self.game_state = 1
+        self.game_over = False
+        self.paused = False  # Despausar el juego
+        self.reset_frog()
+
     def update(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
+
+        if self.game_over:
+            self.handle_game_over_input()  # Manejar la entrada para el Game Over
+            return  # Detener el resto de las actualizaciones cuando el juego ha terminado
 
         if self.game_state == 0:
             self.handle_menu_input()
@@ -251,6 +287,7 @@ class Game:
             else:
                 # Después de 30 cuadros, resetear la rana y reanudar el juego
                 if self.game_state in [2, 3]:
+                    self.game_over_sound.play()
                     self.timer = 0
                     self.game_state = 4
                 elif self.game_state == 4:
@@ -279,6 +316,13 @@ class Game:
                 self.render_text(name, 2 * (TILE_SIZE // 2), (4 + i) * TILE_SIZE, (242, 242, 240))
             self.render_text('PRESIONA S PARA VOLVER', 2 * (TILE_SIZE // 2), 18 * (TILE_SIZE // 2), (243, 208, 64))
 
+        elif self.game_over:
+            # Pantalla de Game Over
+            self.screen.fill((0, 0, 0))
+            self.render_text('GAME OVER', 5 * TILE_SIZE, 5 * TILE_SIZE, (255, 0, 0))
+            self.render_text('PRESS R TO TRY AGAIN', 2 * TILE_SIZE, 7 * TILE_SIZE, (255, 255, 255))
+            self.render_text('PRESS M TO RETURN TO MENU', 1 * TILE_SIZE, 9 * TILE_SIZE, (255, 255, 255))
+
         elif self.game_state in [1, 2, 3, 4]:
             self.screen.blit(self.background, (0, 0))
             for log in self.logs:
@@ -295,5 +339,3 @@ class Game:
             self.render_text('HI-SCORE', 10 * (TILE_SIZE // 2), 0, (242, 242, 240))
             self.render_text(str(self.high_score), 10 * (TILE_SIZE // 2), TILE_SIZE // 2, (189, 81, 90))
             self.render_text('TIME', 24 * (TILE_SIZE // 2), 31 * (TILE_SIZE // 2), (243, 208, 64))
-
-
