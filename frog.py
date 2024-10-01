@@ -15,6 +15,7 @@ class Frog:
             'slam': pygame.image.load('assets/images/frog/frogger_slam.png'),
             'drown': pygame.image.load('assets/images/frog/frogger_drown.png'),
             'death': pygame.image.load('assets/images/frog/frogger_death.png'),
+            'win': pygame.image.load('assets/images/frog/frogger_win.png'),
         }
 
         self.jump_sound = pygame.mixer.Sound('assets/sounds/frog_jump.mp3')

@@ -17,7 +17,7 @@ class Game:
         self.game_over = False  # Variable para ver si el juego terminó
         self.game_over_option = 0  # 0: Try Again, 1: Back to Menu
         self.paused = False  # Indica si el juego está pausado
-
+        self.finished_slots = [0, 0, 0, 0, 0]
         # Configuración de autos
         car_configs = [
             # Format: (x, y, speed, direction)
@@ -274,6 +274,28 @@ class Game:
 
             self.frog.update()
 
+            print(self.frog.rect[0])
+            if self.frog.rect[1] == 32 and self.frog.rect[0] >= 0 and self.frog.rect[0] <= 16:
+                self.frog.rect[0] = 8
+                self.finished_slots[0] = 1
+                self.reset_frog()
+            elif self.frog.rect[1] == 32 and self.frog.rect[0] >= 48 and self.frog.rect[0] <= 64:
+                self.frog.rect[0] = 56
+                self.finished_slots[1] = 1
+                self.reset_frog()
+            elif self.frog.rect[1] == 32 and self.frog.rect[0] >= 96 and self.frog.rect[0] <= 112:
+                self.frog.rect[0] = 104
+                self.finished_slots[2] = 1
+                self.reset_frog()
+            elif self.frog.rect[1] == 32 and self.frog.rect[0] >= 144 and self.frog.rect[0] <= 160:
+                self.frog.rect[0] = 152
+                self.finished_slots[3] = 1
+                self.reset_frog()
+            elif self.frog.rect[1] == 32 and self.frog.rect[0] >= 192 and self.frog.rect[0] <= 208:
+                self.frog.rect[0] = 200
+                self.finished_slots[4] = 1
+                self.reset_frog()
+
         elif self.game_state in [2, 3, 4]:
             # Manejar la animación de la muerte y la transición a la pantalla de reaparición
             if self.timer < 30:
@@ -330,8 +352,23 @@ class Game:
             for turtle in self.turtles:
                 turtle.draw(self.screen)
             self.frog.draw(self.screen)
+            
             for car in self.cars:
                 car.draw(self.screen)
+
+            for idx,slot in enumerate(self.finished_slots):
+                print(slot)
+                if idx == 0 and slot == 1:
+                    self.screen.blit(self.frog.images['win'], (8, 32))
+                if idx == 1 and slot == 1:
+                    self.screen.blit(self.frog.images['win'], (56, 32))
+                if idx == 2 and slot == 1:
+                    self.screen.blit(self.frog.images['win'], (104, 32))
+                if idx == 3 and slot == 1:
+                    self.screen.blit(self.frog.images['win'], (152, 32))
+                if idx == 4 and slot == 1:
+                    self.screen.blit(self.frog.images['win'], (200, 32))
+
 
             # Dibujar puntaje, hi-score y vidas
             self.render_text('1-UP', 4 * (TILE_SIZE // 2), 0, (242, 242, 240))
@@ -339,3 +376,4 @@ class Game:
             self.render_text('HI-SCORE', 10 * (TILE_SIZE // 2), 0, (242, 242, 240))
             self.render_text(str(self.high_score), 10 * (TILE_SIZE // 2), TILE_SIZE // 2, (189, 81, 90))
             self.render_text('TIME', 24 * (TILE_SIZE // 2), 31 * (TILE_SIZE // 2), (243, 208, 64))
+            
