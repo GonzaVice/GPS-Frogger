@@ -274,27 +274,32 @@ class Game:
 
             self.frog.update()
 
-            print(self.frog.rect[0])
+            # Llegada del sapo
             if self.frog.rect[1] == 32 and self.frog.rect[0] >= 0 and self.frog.rect[0] <= 16:
                 self.frog.rect[0] = 8
                 self.finished_slots[0] = 1
                 self.reset_frog()
+                self.score+=200
             elif self.frog.rect[1] == 32 and self.frog.rect[0] >= 48 and self.frog.rect[0] <= 64:
                 self.frog.rect[0] = 56
                 self.finished_slots[1] = 1
                 self.reset_frog()
+                self.score+=200
             elif self.frog.rect[1] == 32 and self.frog.rect[0] >= 96 and self.frog.rect[0] <= 112:
                 self.frog.rect[0] = 104
                 self.finished_slots[2] = 1
                 self.reset_frog()
+                self.score+=200
             elif self.frog.rect[1] == 32 and self.frog.rect[0] >= 144 and self.frog.rect[0] <= 160:
                 self.frog.rect[0] = 152
                 self.finished_slots[3] = 1
                 self.reset_frog()
+                self.score+=200
             elif self.frog.rect[1] == 32 and self.frog.rect[0] >= 192 and self.frog.rect[0] <= 208:
                 self.frog.rect[0] = 200
                 self.finished_slots[4] = 1
                 self.reset_frog()
+                self.score+=200
 
         elif self.game_state in [2, 3, 4]:
             # Manejar la animación de la muerte y la transición a la pantalla de reaparición
@@ -368,7 +373,6 @@ class Game:
                     self.screen.blit(self.frog.images['win'], (152, 32))
                 if idx == 4 and slot == 1:
                     self.screen.blit(self.frog.images['win'], (200, 32))
-
 
             # Dibujar puntaje, hi-score y vidas
             self.render_text('1-UP', 4 * (TILE_SIZE // 2), 0, (242, 242, 240))
