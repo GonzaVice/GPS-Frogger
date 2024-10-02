@@ -473,7 +473,7 @@ class Game:
             time_ratio = self.time_remaining / self.time_limit
             current_width = int(self.time_bar_width * time_ratio)
             # Dibujar la barra desde la izquierda y reducir su ancho hacia la derecha
-            pygame.draw.rect(self.screen, (243, 208, 64), (self.time_bar_x, self.time_bar_y, current_width, self.time_bar_height))
+            pygame.draw.rect(self.screen, (130, 170, 40), (self.time_bar_x, self.time_bar_y, current_width, self.time_bar_height))
     
             self.render_text('LIVES', 0 * (TILE_SIZE // 2), 30 * (TILE_SIZE // 2), (243, 208, 64))
             self.render_text(str(self.lives), 6 * (TILE_SIZE // 2), 30 * (TILE_SIZE // 2), (242, 242, 240))    
