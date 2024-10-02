@@ -15,8 +15,6 @@ class Frog:
             'slam': pygame.image.load('assets/images/frog/frogger_slam.png'),
             'drown': pygame.image.load('assets/images/frog/frogger_drown.png'),
             'death': pygame.image.load('assets/images/frog/frogger_death.png'),
-            'win': pygame.image.load('assets/images/frog/frogger_win.png'),
-            'winner': pygame.image.load('assets/images/frog/frogger_winner.png')
         }
 
         self.jump_sound = pygame.mixer.Sound('assets/sounds/frog_jump.mp3')
@@ -28,6 +26,10 @@ class Frog:
         self.is_ground = True
         self.jump_speed = [3, 3, 2, 1, 2, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0]
         self.jump_speed_index = 0
+        
+        # Definir la fila inicial (suponiendo que la fila inicial es 5)
+        self.start_row = 5
+        self.current_row = self.start_row  # Mantener seguimiento de la fila actual
 
     def start_jump(self, direction):
         self.direction = direction
@@ -49,8 +51,10 @@ class Frog:
 
         if self.direction == 0:  # UP
             self.rect.y -= movement
+            self.current_row -= 1  # Actualiza la fila actual
         elif self.direction == 1:  # DOWN
             self.rect.y += movement
+            self.current_row += 1  # Actualiza la fila actual
         elif self.direction == 2:  # LEFT
             self.rect.x -= movement
         elif self.direction == 3:  # RIGHT
@@ -77,7 +81,7 @@ class Frog:
         if self.is_ground:
             if keys[pygame.K_UP]:
                 self.start_jump(0)
-            elif keys[pygame.K_DOWN]:
+            elif keys[pygame.K_DOWN] and self.current_row > self.start_row:  # No permite moverse hacia abajo si está en la fila inicial o más abajo
                 self.start_jump(1)
             elif keys[pygame.K_LEFT]:
                 self.start_jump(2)
