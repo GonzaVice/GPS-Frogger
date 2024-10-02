@@ -3,7 +3,7 @@ from frog import Frog
 from car import Car
 from log import Log
 from turtl import Turtle
-from settings import TILE_SIZE
+from settings import TILE_SIZE, SCORE_PER_TILE
 import os
 
 class Game:
@@ -26,6 +26,10 @@ class Game:
         self.time_bar_x = 12*(TILE_SIZE//2)  # Posición X de la barra
         self.time_bar_y = 31*(TILE_SIZE//2)  # Posición Y de la barra
         self.time_last_update = pygame.time.get_ticks()  # Última vez que se actualizó el tiempo
+
+        # Varibales para las puntaciones
+        self.frog_previous_position = self.frog.rect.y
+        self.checked_for_high_score = False
 
         # Configuración de autos
         car_configs = [
@@ -81,7 +85,8 @@ class Game:
         self.score = 0
         self.high_score = 1000
         self.lives = 3
-        self.leaderboard_scores = [1500, 1200, 1000, 800, 500]  # Cinco puntajes máximos
+        # self.leaderboard_scores = [1500, 1200, 1000, 800, 500]  # Cinco puntajes máximos
+        self.leaderboard_scores = [self.high_score]
 
         # Cargar imágenes de letras y números
         self.font_images = self.load_font_images()
@@ -257,6 +262,35 @@ class Game:
         self.game_over = False
         self.paused = False  # Despausar el juego
         self.reset_frog()
+        self.reset_previous_y_frog_position()
+        self.checked_for_high_score = False
+
+    def check_y_frog_position(self):
+        if self.frog_previous_position > self.frog.rect.y:
+            self.score += SCORE_PER_TILE
+            self.frog_previous_position = self.frog.rect.y
+    
+    def reset_previous_y_frog_position(self):
+        self.frog_previous_position = self.frog.rect.y
+
+    def check_for_high_score(self):
+        """ Verifica si la puntuación actual es mayor que la puntuación más alta. """
+        if len(self.leaderboard_scores) < 5:
+            self.leaderboard_scores.append(self.score)
+            self.leaderboard_scores.sort(reverse=True)
+            self.high_score = self.leaderboard_scores[0]
+            return 
+        
+        copy_leaderboard_scores = self.leaderboard_scores.copy()
+        is_higher_than_any_highscore = list(map(lambda x: self.score > x,copy_leaderboard_scores))
+        print(is_higher_than_any_highscore)
+
+        if any(is_higher_than_any_highscore):
+            idx_leaderboard = is_higher_than_any_highscore.index(True)
+            self.leaderboard_scores.insert(idx_leaderboard, self.score)
+            self.leaderboard_scores.pop()
+            self.leaderboard_scores.sort(reverse=True)
+            self.high_score = self.leaderboard_scores[0]
 
     def update(self):
         for event in pygame.event.get():
@@ -265,6 +299,11 @@ class Game:
                 exit()
 
         if self.game_over:
+            ###############
+            # Aquí se debe llamar a la función para verificar si la puntuación actual es mayor que la puntuación más alta
+            if not self.checked_for_high_score:
+                self.check_for_high_score()
+                self.checked_for_high_score = True
             self.handle_game_over_input()  # Manejar la entrada para el Game Over
             return  # Detener el resto de las actualizaciones cuando el juego ha terminado
 
@@ -299,32 +338,46 @@ class Game:
 
             self.frog.update()
 
+            #check for the frog position
+            self.check_y_frog_position()
+            
+            
+
             # Llegada del sapo
             if self.frog.rect[1] == 32 and self.frog.rect[0] >= 0 and self.frog.rect[0] <= 16:
                 self.frog.rect[0] = 8
                 self.finished_slots[0] = 1
                 self.reset_frog()
                 self.score+=200
+                self.reset_previous_y_frog_position()
             elif self.frog.rect[1] == 32 and self.frog.rect[0] >= 48 and self.frog.rect[0] <= 64:
                 self.frog.rect[0] = 56
                 self.finished_slots[1] = 1
                 self.reset_frog()
                 self.score+=200
+                self.reset_previous_y_frog_position()
+
             elif self.frog.rect[1] == 32 and self.frog.rect[0] >= 96 and self.frog.rect[0] <= 112:
                 self.frog.rect[0] = 104
                 self.finished_slots[2] = 1
                 self.reset_frog()
                 self.score+=200
+                self.reset_previous_y_frog_position()
+
             elif self.frog.rect[1] == 32 and self.frog.rect[0] >= 144 and self.frog.rect[0] <= 160:
                 self.frog.rect[0] = 152
                 self.finished_slots[3] = 1
                 self.reset_frog()
                 self.score+=200
+                self.reset_previous_y_frog_position()
+
             elif self.frog.rect[1] == 32 and self.frog.rect[0] >= 192 and self.frog.rect[0] <= 208:
                 self.frog.rect[0] = 200
                 self.finished_slots[4] = 1
                 self.reset_frog()
                 self.score+=200
+                self.reset_previous_y_frog_position()
+
 
         elif self.game_state in [2, 3, 4]:
             # Manejar la animación de la muerte y la transición a la pantalla de reaparición
@@ -345,6 +398,8 @@ class Game:
                 elif self.game_state == 4:
                     self.reset_frog()
                     self.time_remaining = self.time_limit  # Reiniciar el tiempo
+                    self.reset_previous_y_frog_position()
+
 
     def draw(self):
         if self.game_state == 0:
@@ -357,8 +412,9 @@ class Game:
         elif self.game_state == 5:
             self.screen.blit(self.leaderboard, (0, 0))
             self.render_text('HI-SCORES:', 2 * (TILE_SIZE // 2), 2 * TILE_SIZE, (243, 208, 64))
-            for i in range(5):
-                self.render_text(f'{i + 1}. SCORE: {self.high_score - (i * 100)}', 2 * (TILE_SIZE // 2), (4 + i) * TILE_SIZE, (242, 242, 240))
+            #Here is where in have to do the logic for displaying the high scores
+            for idx, score in enumerate(self.leaderboard_scores):
+                self.render_text(f'{idx + 1}. SCORE: {score}', 2 * (TILE_SIZE // 2), (4 + idx) * TILE_SIZE, (242, 242, 240))
             self.render_text('PRESIONA S PARA VOLVER', 2 * (TILE_SIZE // 2), 18 * (TILE_SIZE // 2), (243, 208, 64))
 
         elif self.game_state == 6:
@@ -388,7 +444,6 @@ class Game:
                 car.draw(self.screen)
 
             for idx,slot in enumerate(self.finished_slots):
-                print(slot)
                 if idx == 0 and slot == 1:
                     self.screen.blit(self.frog.images['win'], (8, 32))
                 if idx == 1 and slot == 1:

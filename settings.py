@@ -9,3 +9,4 @@ FPS = 60  # Velocidad de fotogramas por segundo
 LEVEL_TIME = 60  # Límite de tiempo en segundos
 
 TITLE = 'GPS Frogger'
+SCORE_PER_TILE = 1  # Puntos por cada tile cruzado
