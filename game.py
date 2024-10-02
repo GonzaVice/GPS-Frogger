@@ -3,6 +3,7 @@ from frog import Frog
 from car import Car
 from log import Log
 from turtl import Turtle
+from level import level_configs
 from settings import TILE_SIZE, SCORE_PER_TILE
 import os
 
@@ -17,7 +18,7 @@ class Game:
         self.game_over = False  # Variable para ver si el juego terminó
         self.game_over_option = 0  # 0: Try Again, 1: Back to Menu
         self.paused = False  # Indica si el juego está pausado
-        self.finished_slots = [0, 0, 0, 0, 0]
+        self.finished_slots = [False, False, False, False, False]
 
         self.time_limit = 60  # 60 segundos para completar la jugada
         self.time_remaining = self.time_limit  # Inicialmente igual al límite
@@ -31,47 +32,9 @@ class Game:
         self.frog_previous_position = self.frog.rect.y
         self.checked_for_high_score = False
 
-        # Configuración de autos
-        car_configs = [
-            # Format: (x, y, speed, direction)
-            (5, 13, 1, 0, 'car1.png'),
-            (7, 12, 0.25, 1, 'car2.png'),
-            (9, 11, 1.5, 0, 'car3.png'),
-            (11, 10, 2, 1, 'car4.png'),
-            (11, 9, 0.75, 0, 'truck.png')
-        ]
-        self.cars = [Car(x * TILE_SIZE, y * TILE_SIZE, speed, direction, image) for x, y, speed, direction, image in car_configs]
-
-        # Configuración de troncos
-        self.logs = []
-
-        log_positions = [
-            # Format: (x, y, length, speed)
-            (4, 6, 3, 1),   # Logs at row 6
-            (9, 6, 3, 1),   # Logs at row 6
-            (1, 5, 5, 2),   # Logs at row 5
-            (1, 3, 4, 1),   # Logs at row 3
-            (7, 3, 4, 1),   # Logs at row 3
-        ]
-
-        for start_x, y, length, speed in log_positions:
-            for i in range(length):
-                if i == 0:
-                    image = 'log_left.png'
-                elif i == length - 1:
-                    image = 'log_right.png'
-                else:
-                    image = 'log_middle.png'
-                
-                self.logs.append(Log((start_x + i) * TILE_SIZE, y * TILE_SIZE, speed, 1, image))
-
-
-        # Configuración de tortugas
-        turtle_positions = [
-            (6, 7), (7, 7), (8, 7), (11, 7), (12, 7), (13, 7),
-            (1, 4), (2, 4), (5, 4), (6, 4), (9, 4), (10, 4)
-        ]
-        self.turtles = [Turtle(x * TILE_SIZE, y * TILE_SIZE, 1, 0) for x, y in turtle_positions]
+        self.current_level = 0  # Nivel inicial
+        self.level_configs = level_configs
+        self.init_level()
 
         # Cargar recursos gráficos y de sonido
         self.menu = pygame.image.load('assets/images/background/menu.png')
@@ -85,7 +48,6 @@ class Game:
         self.score = 0
         self.high_score = 1000
         self.lives = 3
-        # self.leaderboard_scores = [1500, 1200, 1000, 800, 500]  # Cinco puntajes máximos
         self.leaderboard_scores = [self.high_score]
 
         # Cargar imágenes de letras y números
@@ -101,6 +63,37 @@ class Game:
 
         if self.game_over:
             self.paused = True  # Pausa el juego
+
+    def init_level(self):
+        """Inicializa los objetos del nivel actual."""
+        config = self.level_configs[self.current_level]
+
+        # Configuración de autos
+        self.cars = [Car(x * TILE_SIZE, y * TILE_SIZE, speed, direction, image) for x, y, speed, direction, image in config["cars"]]
+
+        # Configuración de troncos
+        self.logs = []
+        for start_x, y, length, speed in config["logs"]:
+            for i in range(length):
+                if i == 0:
+                    image = 'log_left.png'
+                elif i == length - 1:
+                    image = 'log_right.png'
+                else:
+                    image = 'log_middle.png'
+                self.logs.append(Log((start_x + i) * TILE_SIZE, y * TILE_SIZE, speed, 1, image))
+
+        # Configuración de tortugas
+        self.turtles = [Turtle(x * TILE_SIZE, y * TILE_SIZE, 1, 0) for x, y in config["turtles"]]
+
+    def next_level(self):
+        """Avanza al siguiente nivel."""
+        if self.current_level < len(self.level_configs) - 1:
+            self.current_level += 1
+            self.init_level()  # Re-inicializa los objetos con el nuevo nivel
+        else:
+            self.game_state = 0 ## Después hacemos un congratulations y thank you.
+            print("Has completado todos los niveles. ¡Felicidades!")
 
     def load_font_images(self):
         """ Carga las imágenes de las letras y números desde la carpeta de assets. """
@@ -340,43 +333,47 @@ class Game:
 
             #check for the frog position
             self.check_y_frog_position()
-            
-            
 
             # Llegada del sapo
             if self.frog.rect[1] == 32 and self.frog.rect[0] >= 0 and self.frog.rect[0] <= 16:
                 self.frog.rect[0] = 8
-                self.finished_slots[0] = 1
+                self.finished_slots[0] = True
                 self.reset_frog()
                 self.score+=200
                 self.reset_previous_y_frog_position()
             elif self.frog.rect[1] == 32 and self.frog.rect[0] >= 48 and self.frog.rect[0] <= 64:
                 self.frog.rect[0] = 56
-                self.finished_slots[1] = 1
+                self.finished_slots[1] = True
                 self.reset_frog()
                 self.score+=200
                 self.reset_previous_y_frog_position()
 
             elif self.frog.rect[1] == 32 and self.frog.rect[0] >= 96 and self.frog.rect[0] <= 112:
                 self.frog.rect[0] = 104
-                self.finished_slots[2] = 1
+                self.finished_slots[2] = True
                 self.reset_frog()
                 self.score+=200
                 self.reset_previous_y_frog_position()
 
             elif self.frog.rect[1] == 32 and self.frog.rect[0] >= 144 and self.frog.rect[0] <= 160:
                 self.frog.rect[0] = 152
-                self.finished_slots[3] = 1
+                self.finished_slots[3] = True
                 self.reset_frog()
                 self.score+=200
                 self.reset_previous_y_frog_position()
 
             elif self.frog.rect[1] == 32 and self.frog.rect[0] >= 192 and self.frog.rect[0] <= 208:
                 self.frog.rect[0] = 200
-                self.finished_slots[4] = 1
+                self.finished_slots[4] = True
                 self.reset_frog()
                 self.score+=200
                 self.reset_previous_y_frog_position()
+            
+            # Verificar si todos los slots están completos
+            if all(self.finished_slots):
+                self.finished_slots = [False] * len(self.finished_slots)
+                self.next_level()  # Avanza al siguiente nivel
+                self.reset_frog()  # Reinicia la rana para el nuevo nivel
 
 
         elif self.game_state in [2, 3, 4]:
@@ -405,6 +402,10 @@ class Game:
         if self.game_state == 0:
             self.screen.blit(self.menu, (0, 0))
             options = ['GAME START', 'LEADERBOARD', 'CREDITS']
+            self.render_text('USA LAS FLECHAS PARA', 2 * (TILE_SIZE // 2), 23 * (TILE_SIZE // 2), (189, 81, 90))
+            self.render_text('MOVERSE', 2 * (TILE_SIZE // 2), 24 * (TILE_SIZE // 2), (189, 81, 90))
+            self.render_text('PRESIONA S O ENTER PARA', 2 * (TILE_SIZE // 2), 26 * (TILE_SIZE // 2), (189, 81, 90))
+            self.render_text('SELECCIONAR UNA OPCION', 2 * (TILE_SIZE // 2), 27 * (TILE_SIZE // 2), (189, 81, 90))
             for i, option in enumerate(options):
                 color = (243, 208, 64) if i == self.selected_option else (255, 255, 255)
                 self.render_text(option, 2 * (TILE_SIZE // 2), (18 + i) * (TILE_SIZE // 2) + (4 * i), color)
@@ -443,17 +444,17 @@ class Game:
             for car in self.cars:
                 car.draw(self.screen)
 
-            for idx,slot in enumerate(self.finished_slots):
-                if idx == 0 and slot == 1:
-                    self.screen.blit(self.frog.images['win'], (8, 32))
-                if idx == 1 and slot == 1:
-                    self.screen.blit(self.frog.images['win'], (56, 32))
-                if idx == 2 and slot == 1:
-                    self.screen.blit(self.frog.images['win'], (104, 32))
-                if idx == 3 and slot == 1:
-                    self.screen.blit(self.frog.images['win'], (152, 32))
-                if idx == 4 and slot == 1:
-                    self.screen.blit(self.frog.images['win'], (200, 32))
+            for idx, slot in enumerate(self.finished_slots):
+                if idx == 0 and slot == True:
+                    self.screen.blit(self.frog.images['winner'], (8, 32))
+                if idx == 1 and slot == True:
+                    self.screen.blit(self.frog.images['winner'], (56, 32))
+                if idx == 2 and slot == True:
+                    self.screen.blit(self.frog.images['winner'], (104, 32))
+                if idx == 3 and slot == True:
+                    self.screen.blit(self.frog.images['winner'], (152, 32))
+                if idx == 4 and slot == True:
+                    self.screen.blit(self.frog.images['winner'], (200, 32))
 
             # Dibujar puntaje, hi-score y vidas
             self.render_text('1-UP', 4 * (TILE_SIZE // 2), 0, (242, 242, 240))
