@@ -147,8 +147,9 @@ class Game:
                 if not self.on_log or self.on_log != new_log:
                     self.log_sound.play()
 
-                # Actualizar la posición de la rana basada en la velocidad del tronco
-                frog.rect.x += log.speed
+                if self.frog.is_ground or (not self.frog.is_ground and self.frog.direction in [2, 3]):
+                    # Actualizar la posición de la rana basada en la velocidad del tronco
+                    frog.rect.x += log.speed
                 break  # Sal del bucle si la rana colisiona con un tronco
 
         # Actualizar la variable de estado para saber en qué tronco está la rana
@@ -164,8 +165,10 @@ class Game:
                 if not self.on_turtle:
                     self.turtle_sound.play()
 
-                # Actualizar la posición de la rana basada en la velocidad de la tortuga
-                frog.rect.x -= turtle.speed
+                
+                if self.frog.is_ground or (not self.frog.is_ground and self.frog.direction in [2, 3]):
+                    # Actualizar la posición de la rana basada en la velocidad de la tortuga
+                    frog.rect.x -= turtle.speed
                 break  # Sal del bucle si la rana colisiona con una tortuga
 
         # Actualizar la variable de estado de las tortugas
