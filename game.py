@@ -243,6 +243,8 @@ class Game:
         """Maneja la entrada del usuario en la pantalla de Game Over."""
         keys = pygame.key.get_pressed()
         if keys[pygame.K_r]:  # Volver a intentar
+            self.current_level = 0
+            self.init_level()
             self.reset_game()
         elif keys[pygame.K_m]:  # Volver al menú
             self.game_state = 0  # Regresar al menú
@@ -318,6 +320,8 @@ class Game:
             # Verificar si el tiempo se ha acabado
             if self.time_remaining <= 0:
                 self.game_state = 4  # Estado de "muerte por tiempo agotado"
+                self.lives -= 1
+                self.game_over_sound.play()
                 self.timer = 0
 
             # Juego normal, actualizar colisiones y objetos en movimiento
@@ -467,9 +471,11 @@ class Game:
             time_ratio = self.time_remaining / self.time_limit
             current_width = int(self.time_bar_width * time_ratio)
             # Dibujar la barra desde la izquierda y reducir su ancho hacia la derecha
-            pygame.draw.rect(self.screen, (255, 255, 0), (self.time_bar_x, self.time_bar_y, current_width, self.time_bar_height))
+            pygame.draw.rect(self.screen, (243, 208, 64), (self.time_bar_x, self.time_bar_y, current_width, self.time_bar_height))
     
             self.render_text('LIVES', 0 * (TILE_SIZE // 2), 30 * (TILE_SIZE // 2), (243, 208, 64))
-            self.render_text(str(self.lives), 6 * (TILE_SIZE // 2), 30 * (TILE_SIZE // 2), (242, 242, 240))
+            self.render_text(str(self.lives), 6 * (TILE_SIZE // 2), 30 * (TILE_SIZE // 2), (242, 242, 240))    
+            self.render_text('LEVEL', 0 * (TILE_SIZE // 2), 31 * (TILE_SIZE // 2), (243, 208, 64))
+            self.render_text(str(self.current_level+1), 6 * (TILE_SIZE // 2), 31 * (TILE_SIZE // 2), (242, 242, 240))
 
             
