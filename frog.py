@@ -15,6 +15,8 @@ class Frog:
             'slam': pygame.image.load('assets/images/frog/frogger_slam.png'),
             'drown': pygame.image.load('assets/images/frog/frogger_drown.png'),
             'death': pygame.image.load('assets/images/frog/frogger_death.png'),
+            'win': pygame.image.load('assets/images/frog/frogger_win.png'),
+            'winner': pygame.image.load('assets/images/frog/frogger_winner.png')
         }
 
         self.jump_sound = pygame.mixer.Sound('assets/sounds/frog_jump.mp3')
@@ -82,8 +84,8 @@ class Frog:
             if keys[pygame.K_UP]:
                 if self.rect.y > 0:
                     self.start_jump(0)
-            elif keys[pygame.K_DOWN] and self.current_row > self.start_row:  # No permite moverse hacia abajo si está en la fila inicial o más abajo
-                if self.rect.y < (SCREEN_HEIGHT - self.rect.height):
+            elif keys[pygame.K_DOWN]:
+                if self.rect.y < (SCREEN_HEIGHT - self.rect.height - 16):
                     self.start_jump(1)
             elif keys[pygame.K_LEFT]:
                 if self.rect.x > 0:
