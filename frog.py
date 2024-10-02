@@ -1,5 +1,5 @@
 import pygame
-
+from settings import SCREEN_WIDTH, SCREEN_HEIGHT
 class Frog:
     def __init__(self, x, y):
         # Cargar las imágenes de la rana según su estado y dirección
@@ -80,13 +80,17 @@ class Frog:
 
         if self.is_ground:
             if keys[pygame.K_UP]:
-                self.start_jump(0)
+                if self.rect.y > 0:
+                    self.start_jump(0)
             elif keys[pygame.K_DOWN] and self.current_row > self.start_row:  # No permite moverse hacia abajo si está en la fila inicial o más abajo
-                self.start_jump(1)
+                if self.rect.y < (SCREEN_HEIGHT - self.rect.height):
+                    self.start_jump(1)
             elif keys[pygame.K_LEFT]:
-                self.start_jump(2)
+                if self.rect.x > 0:
+                    self.start_jump(2)
             elif keys[pygame.K_RIGHT]:
-                self.start_jump(3)
+                if self.rect.x < (SCREEN_WIDTH - self.rect.width):
+                    self.start_jump(3)
         else:
             self.apply_jump()
 
