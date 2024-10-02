@@ -18,6 +18,15 @@ class Game:
         self.game_over_option = 0  # 0: Try Again, 1: Back to Menu
         self.paused = False  # Indica si el juego está pausado
         self.finished_slots = [0, 0, 0, 0, 0]
+
+        self.time_limit = 60  # 60 segundos para completar la jugada
+        self.time_remaining = self.time_limit  # Inicialmente igual al límite
+        self.time_bar_width = 6*TILE_SIZE  # Ancho de la barra de tiempo
+        self.time_bar_height = 6  # Altura de la barra
+        self.time_bar_x = 12*(TILE_SIZE//2)  # Posición X de la barra
+        self.time_bar_y = 31*(TILE_SIZE//2)  # Posición Y de la barra
+        self.time_last_update = pygame.time.get_ticks()  # Última vez que se actualizó el tiempo
+
         # Configuración de autos
         car_configs = [
             # Format: (x, y, speed, direction)
@@ -172,13 +181,14 @@ class Game:
                 self.game_over = True  # Si las vidas se acaban, se activa el Game Over
             self.timer = 0  # Reiniciar el temporizador para la animación de muerte
 
-
     def reset_frog(self):
         self.frog.rect.topleft = (7 * TILE_SIZE, 14 * TILE_SIZE)
         self.game_state = 1
         self.timer = 0
         self.frog.is_ground = True
         self.frog.image = self.frog.images['ground_up']
+        self.time_remaining = self.time_limit  # Reiniciar el tiempo
+        self.time_last_update = pygame.time.get_ticks()  # Reiniciar la última actualización del tiempo
 
     def handle_menu_input(self):
         """Maneja la entrada del usuario para el menú."""
@@ -263,6 +273,18 @@ class Game:
             self.handle_credits_input()
 
         if self.game_state == 1:
+
+            # Actualizar el tiempo restante
+            current_time = pygame.time.get_ticks()
+            if current_time - self.time_last_update >= 1000:  # Actualizar cada segundo
+                self.time_remaining -= 1
+                self.time_last_update = current_time
+
+            # Verificar si el tiempo se ha acabado
+            if self.time_remaining <= 0:
+                self.game_state = 4  # Estado de "muerte por tiempo agotado"
+                self.timer = 0
+
             # Juego normal, actualizar colisiones y objetos en movimiento
             self.check_collision(self.frog)
             for car in self.cars:
@@ -319,6 +341,7 @@ class Game:
                     self.game_state = 4
                 elif self.game_state == 4:
                     self.reset_frog()
+                    self.time_remaining = self.time_limit  # Reiniciar el tiempo
 
     def draw(self):
         if self.game_state == 0:
@@ -379,5 +402,15 @@ class Game:
             self.render_text(str(self.score), 4 * (TILE_SIZE // 2), TILE_SIZE // 2, (189, 81, 90))
             self.render_text('HI-SCORE', 10 * (TILE_SIZE // 2), 0, (242, 242, 240))
             self.render_text(str(self.high_score), 10 * (TILE_SIZE // 2), TILE_SIZE // 2, (189, 81, 90))
+
             self.render_text('TIME', 24 * (TILE_SIZE // 2), 31 * (TILE_SIZE // 2), (243, 208, 64))
+            # Dibujar la barra de tiempo
+            time_ratio = self.time_remaining / self.time_limit
+            current_width = int(self.time_bar_width * time_ratio)
+            # Dibujar la barra desde la izquierda y reducir su ancho hacia la derecha
+            pygame.draw.rect(self.screen, (255, 255, 0), (self.time_bar_x, self.time_bar_y, current_width, self.time_bar_height))
+    
+            self.render_text('LIVES', 0 * (TILE_SIZE // 2), 30 * (TILE_SIZE // 2), (243, 208, 64))
+            self.render_text(str(self.lives), 6 * (TILE_SIZE // 2), 30 * (TILE_SIZE // 2), (242, 242, 240))
+
             
