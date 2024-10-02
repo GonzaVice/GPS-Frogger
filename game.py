@@ -65,8 +65,10 @@ class Game:
             self.paused = True  # Pausa el juego
 
     def init_level(self):
+        # Si llega al ultimo nivel, se repite
+        current_level_index = min(self.current_level, len(self.level_configs)-1)
         """Inicializa los objetos del nivel actual."""
-        config = self.level_configs[self.current_level]
+        config = self.level_configs[current_level_index]
 
         # Configuración de autos
         self.cars = [Car(x * TILE_SIZE, y * TILE_SIZE, speed, direction, image) for x, y, speed, direction, image in config["cars"]]
@@ -88,12 +90,8 @@ class Game:
 
     def next_level(self):
         """Avanza al siguiente nivel."""
-        if self.current_level < len(self.level_configs) - 1:
-            self.current_level += 1
-            self.init_level()  # Re-inicializa los objetos con el nuevo nivel
-        else:
-            self.game_state = 0 ## Después hacemos un congratulations y thank you.
-            print("Has completado todos los niveles. ¡Felicidades!")
+        self.current_level += 1
+        self.init_level()  # Re-inicializa los objetos con el nuevo nivel
 
     def load_font_images(self):
         """ Carga las imágenes de las letras y números desde la carpeta de assets. """
@@ -242,20 +240,22 @@ class Game:
     def handle_game_over_input(self):
         """Maneja la entrada del usuario en la pantalla de Game Over."""
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_r]:  # Volver a intentar
-            self.current_level = 0
-            self.init_level()
-            self.reset_game()
-        elif keys[pygame.K_m]:  # Volver al menú
-            self.game_state = 0  # Regresar al menú
-            self.game_over = False  # Restablecer el estado de Game Over
 
-    def reset_game(self):
+        if keys[pygame.K_r]:  # Volver a intentar
+            self.reset_game(1)
+        elif keys[pygame.K_m]:  # Volver al menú
+            self.reset_game(0)
+            self.game_state = 0
+
+    def reset_game(self, state):
         self.lives = 3
         self.score = 0
-        self.game_state = 1
+        self.game_state = state
         self.game_over = False
         self.paused = False  # Despausar el juego
+        self.current_level = 0
+        self.finished_slots = [False] * len(self.finished_slots)
+        self.init_level()
         self.reset_frog()
         self.reset_previous_y_frog_position()
         self.checked_for_high_score = False
@@ -401,7 +401,6 @@ class Game:
                     self.time_remaining = self.time_limit  # Reiniciar el tiempo
                     self.reset_previous_y_frog_position()
 
-
     def draw(self):
         if self.game_state == 0:
             self.screen.blit(self.menu, (0, 0))
@@ -411,7 +410,7 @@ class Game:
             self.render_text('PRESIONA S O ENTER PARA', 2 * (TILE_SIZE // 2), 26 * (TILE_SIZE // 2), (189, 81, 90))
             self.render_text('SELECCIONAR UNA OPCION', 2 * (TILE_SIZE // 2), 27 * (TILE_SIZE // 2), (189, 81, 90))
             for i, option in enumerate(options):
-                color = (243, 208, 64) if i == self.selected_option else (255, 255, 255)
+                color = (243, 208, 64) if i == self.selected_option else (242, 242, 240)
                 self.render_text(option, 2 * (TILE_SIZE // 2), (18 + i) * (TILE_SIZE // 2) + (4 * i), color)
 
         elif self.game_state == 5:
@@ -432,10 +431,13 @@ class Game:
 
         elif self.game_over:
             # Pantalla de Game Over
-            self.screen.fill((0, 0, 0))
-            self.render_text('GAME OVER', 5 * TILE_SIZE, 5 * TILE_SIZE, (255, 0, 0))
-            self.render_text('PRESS R TO TRY AGAIN', 2 * TILE_SIZE, 7 * TILE_SIZE, (255, 255, 255))
-            self.render_text('PRESS M TO RETURN TO MENU', 1 * TILE_SIZE, 9 * TILE_SIZE, (255, 255, 255))
+            self.screen.fill((35, 33, 61))
+            self.render_text('GAME OVER', 5 * TILE_SIZE, 5 * TILE_SIZE, (189, 81, 90))
+            self.render_text('TU PUNTAJE ES', 3 * TILE_SIZE, 7 * TILE_SIZE, (243, 208, 64))
+            self.render_text(str(self.score), 10 * TILE_SIZE, 7 * TILE_SIZE, (242, 242, 240))
+            self.render_text('GRACIAS POR JUGAR', 3 * TILE_SIZE, 9 * TILE_SIZE, (243, 208, 64))
+            self.render_text('PRESS R TO TRY AGAIN', 2 * TILE_SIZE, 11 * TILE_SIZE, (242, 242, 240))
+            self.render_text('PRESS M TO RETURN TO MENU', 1 * TILE_SIZE, 13 * TILE_SIZE, (242, 242, 240))
 
         elif self.game_state in [1, 2, 3, 4]:
             self.screen.blit(self.background, (0, 0))
